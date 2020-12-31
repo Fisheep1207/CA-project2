@@ -9,14 +9,29 @@ input               clk_i;
 input               rst_i;
 input               start_i;
 
-Data_Memory Data_Memory(
-    .clk_i (clk_i), 
-    .addr_i (EX_MEM.ALUresult_o), 
-    .MemRead_i (EX_MEM.MemRead_o),
-    .MemWrite_i (EX_MEM.MemWrite_o),
-    .data_i (EX_MEM.Readdata2_o),
-    .data_o ()
+module dcache_controller
+(
+    // System clock, reset and stall
+    .clk_i          (clk_i), 
+    .rst_i          (rst_i),
+    
+    // to Data Memory interface        
+    .mem_data_i     (Data_Memory.data_o), 
+    .mem_ack_i      (Data_Memory.ack_o),     
+    .mem_data_o     (), 
+    .mem_addr_o     (),     
+    .mem_enable_o   (), 
+    .mem_write_o    (), 
+    
+    // to CPU interface    
+    .cpu_data_i     (EX_MEM.Readdata2_o), 
+    .cpu_addr_i     (EX_MEM.ALUresult_o),     
+    .cpu_MemRead_i  (EX_MEM.MemRead_o), 
+    .cpu_MemWrite_i (EX_MEM.MemWrite_o), 
+    .cpu_data_o     (), 
+    .cpu_stall_o    ()
 );
+
 
 Control Control(
     // Load / STore Operations
@@ -169,7 +184,7 @@ MEM_WB MEM_WB(
     .ALUresult_o(),
     .ALUresult_i(EX_MEM.ALUresult_o),
     .Readdata_o(),
-    .Readdata_i(Data_Memory.data_o),
+    .Readdata_i(Data_Memory.cpu_data_o),
     .INS_11_7_o(),
     .INS_11_7_i(EX_MEM.INS_11_7_o)
 );
