@@ -26,7 +26,8 @@ module ID_EX
     Rs1_i,
     Rs1_o,
     Rs2_i,
-    Rs2_o
+    Rs2_o,
+    MemStall_i
 );
 input               clk_i;
 input RegWrite_i, MemToReg_i, MemRead_i, MemWrite_i, ALUSrc_i;     

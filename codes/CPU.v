@@ -58,6 +58,7 @@ PC PC(
     .clk_i      (clk_i),
     .rst_i      (rst_i),
     .start_i    (start_i),
+    .stall_i (dcache_controller.cpu_stall_o), // 其實是 MemStall_i
     .PCWrite_i  (Hazard_Detection.PCWrite_o),
     .pc_i       (MUX_PC.data_o),
     .pc_o       ()
@@ -118,13 +119,14 @@ ALU_Control ALU_Control(
 );
 
 IF_ID IF_ID(
-    .clk_i(clk_i),
-    .Flush_i(And_Gat.data_o),
-    .Stall_i(Hazard_Detection.Stall_o),
-    .PC_i(PC.pc_o),
-    .IF_ID_i(Instruction_Memory.instr_o),
-    .IF_ID_o(),
-    .PC_o()
+    .clk_i      (clk_i),
+    .Flush_i    (And_Gat.data_o),
+    .Stall_i    (Hazard_Detection.Stall_o),
+    .PC_i       (PC.pc_o),
+    .IF_ID_i    (Instruction_Memory.instr_o),
+    .IF_ID_o    (),
+    .PC_o       (),
+    .MemStall_i    (dcache_controller.cpu_stall_o)
 );
 
 ID_EX ID_EX(
@@ -154,7 +156,8 @@ ID_EX ID_EX(
     .Rs1_i(IF_ID.IF_ID_o[19:15]),
     .Rs1_o(),
     .Rs2_i(IF_ID.IF_ID_o[24:20]),
-    .Rs2_o()
+    .Rs2_o(),
+    .MemStall_i    (dcache_controller.cpu_stall_o)
 );
 
 EX_MEM EX_MEM(
@@ -172,7 +175,8 @@ EX_MEM EX_MEM(
     .Readdata2_o(),
     .Readdata2_i(ForwardB_MUX.data_o),
     .INS_11_7_o(),
-    .INS_11_7_i(ID_EX.INS_11_7_o)
+    .INS_11_7_i(ID_EX.INS_11_7_o),
+    .MemStall_i    (dcache_controller.cpu_stall_o)
 );
 
 MEM_WB MEM_WB(
@@ -186,7 +190,8 @@ MEM_WB MEM_WB(
     .Readdata_o(),
     .Readdata_i(Data_Memory.cpu_data_o),
     .INS_11_7_o(),
-    .INS_11_7_i(EX_MEM.INS_11_7_o)
+    .INS_11_7_i(EX_MEM.INS_11_7_o),
+    .MemStall_i    (dcache_controller.cpu_stall_o)
 );
 
 Forwarding_Unit Forwarding_Unit(

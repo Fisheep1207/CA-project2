@@ -7,11 +7,12 @@ module IF_ID
     PC_i,
     IF_ID_o,
     PC_o,
+    MemStall_i
 );
 
 input clk_i;
 input [31:0] IF_ID_i;
-input Stall_i;
+input Stall_i, MemStall_i;
 input Flush_i;
 input [31:0] PC_i;
 output reg [31:0] PC_o;

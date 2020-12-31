@@ -14,10 +14,11 @@ module EX_MEM
     Readdata2_o,
     Readdata2_i,
     INS_11_7_o,
-    INS_11_7_i
+    INS_11_7_i,
+    MemStall_i
 );
 input               clk_i;
-input RegWrite_i, MemToReg_i, MemRead_i, MemWrite_i;     
+input RegWrite_i, MemToReg_i, MemRead_i, MemWrite_i, MemStall_i;     
 input [31:0] Readdata2_i, ALUresult_i;
 input [4:0]  INS_11_7_i;
 output reg RegWrite_o, MemToReg_o, MemRead_o, MemWrite_o;

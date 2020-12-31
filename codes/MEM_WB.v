@@ -10,10 +10,11 @@ module MEM_WB
     Readdata_o,
     Readdata_i,
     INS_11_7_o,
-    INS_11_7_i
+    INS_11_7_i,
+    MemStall_i
 );
 input               clk_i;
-input RegWrite_i, MemToReg_i;
+input RegWrite_i, MemToReg_i, MemStall_i;
 input [31:0] ALUresult_i, Readdata_i;
 input [4:0] INS_11_7_i;
 output reg RegWrite_o, MemToReg_o;
