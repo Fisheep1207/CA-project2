@@ -33,7 +33,7 @@ parameter STATE_IDLE            = 1'h0,
 
 reg        [1:0]        state;
 
-assign    ack_o = (state == STATE_WAIT) && (count == 4'd9);
+assign    ack_o = (state == STATE_WAIT) && (count == 4'd8);
 assign    addr = addr_i>>5;
 assign    data_o = data;
 
