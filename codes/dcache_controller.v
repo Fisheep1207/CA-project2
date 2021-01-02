@@ -118,15 +118,25 @@ assign    write_hit    = hit & cpu_MemWrite_i;
 assign    cache_dirty  = write_hit;
 
 // TODO: add your code here!  (r_hit_data=...?)
+// 如果 read hit 的話，直接拿 sram_cache_data(從 sram 傳回來的 data)，如果沒有就是拿到從 memory 來的 data_input 
+assign r_hit_data  = (hit)? sram_cache_data : mem_data_i;
+
+integer tmp1_offset, tmp2_offset;
+
 // read data :  256-bit to 32-bit
 always@(cpu_offset or r_hit_data) begin
     // TODO: add your code here! (cpu_data=...?)
+    tmp1_offset = 8*cpu_offset;
+    cpu_data = r_hit_data[tmp1_offset +: 32];    
 end
 
 
 // write data :  32-bit to 256-bit
 always@(cpu_offset or r_hit_data or cpu_data_i) begin
     // TODO: add your code here! (w_hit_data=...?)
+    w_hit_data = r_hit_data;
+    tmp2_offset = 8*cpu_offset;
+    w_hit_data[tmp2_offset +: 32] = cpu_data_i;
 end
 
 
@@ -151,30 +161,51 @@ always@(posedge clk_i or posedge rst_i) begin
             end
             STATE_MISS: begin
                 if(sram_dirty) begin          // write back if dirty
-                    // TODO: add your code here! 
+                    // TODO: add your code here!
+                    // mem_enable  <= 1'b1;
+                    mem_write   <= 1'b1;
+                    // cache_write <= 1'b0; 
+                    write_back  <= 1'b1;
                     state <= STATE_WRITEBACK;
                 end
                 else begin                    // write allocate: write miss = read miss + write hit; read miss = read miss + read hit
                     // TODO: add your code here! 
+                    // mem_enable  <= 1'b1;
+                    mem_write   <= 1'b0;
+                    // cache_write <= 1'b0; 
+                    write_back  <= 1'b0;
                     state <= STATE_READMISS;
                 end
             end
             STATE_READMISS: begin
                 if(mem_ack_i) begin            // wait for data memory acknowledge
-                    // TODO: add your code here! 
+                    // TODO: add your code here!
+                    // 其實 mem_write 跟 write_back 感覺不用加，因為 enable 已經關掉了
+                    mem_enable  <= 1'b0;
+                    // mem_write   <= 1'b0;
+                    cache_write <= 1'b1; 
+                    // write_back  <= 1'b0;
                     state <= STATE_READMISSOK;
                 end
                 else begin
                     state <= STATE_READMISS;
                 end
             end
-            STATE_READMISSOK: begin            // wait for data memory acknowledge
-                // TODO: add your code here! 
+            STATE_READMISSOK: begin
+                // TODO: add your code here!
+                // mem_enable  <= 1'b0;
+                // mem_write   <= 1'b0;
+                cache_write <= 1'b0;
+                // write_back  <= 1'b0;
                 state <= STATE_IDLE;
             end
             STATE_WRITEBACK: begin
                 if(mem_ack_i) begin            // wait for data memory acknowledge
-                    // TODO: add your code here! 
+                    // TODO: add your code here!
+                    mem_enable  <= 1'b1;
+                    mem_write   <= 1'b0;
+                    // cache_write <= 1'b0;
+                    write_back  <= 1'b0;
                     state <= STATE_READMISS;
                 end
                 else begin

@@ -22,10 +22,12 @@ output reg [31:0] ALUresult_o, Readdata_o;
 output reg [4:0] INS_11_7_o;
 
 always@(posedge clk_i)  begin
-    RegWrite_o  <= RegWrite_i;
-    MemToReg_o  <= MemToReg_i;
-    Readdata_o  <= Readdata_i;
-    ALUresult_o <= ALUresult_i;
-    INS_11_7_o  <= INS_11_7_i;
+    if (!MemStall_i) begin
+        RegWrite_o  <= RegWrite_i;
+        MemToReg_o  <= MemToReg_i;
+        Readdata_o  <= Readdata_i;
+        ALUresult_o <= ALUresult_i;
+        INS_11_7_o  <= INS_11_7_i;
+    end
 end
 endmodule

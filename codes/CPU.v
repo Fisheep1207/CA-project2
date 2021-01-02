@@ -2,14 +2,28 @@ module CPU
 (
     clk_i, 
     rst_i,
-    start_i
+    start_i,
+    mem_data_i, 
+    mem_ack_i,     
+    mem_data_o, 
+    mem_addr_o,     
+    mem_enable_o,
+    mem_write_o
 );
-// Ports
-input               clk_i;
-input               rst_i;
-input               start_i;
 
-module dcache_controller
+
+// Ports
+input                clk_i;
+input                rst_i;
+input                start_i;
+input                mem_ack_i; 
+input     [255:0]    mem_data_i;
+input     [255:0]    mem_data_o;
+output    [31:0]     mem_addr_o;     
+output               mem_enable_o; 
+output               mem_write_o; 
+
+dcache_controller dcache
 (
     // System clock, reset and stall
     .clk_i          (clk_i), 
@@ -58,7 +72,7 @@ PC PC(
     .clk_i      (clk_i),
     .rst_i      (rst_i),
     .start_i    (start_i),
-    .stall_i (dcache_controller.cpu_stall_o), // 其實是 MemStall_i
+    .stall_i    (dcache.cpu_stall_o), // 其實是 MemStall_i
     .PCWrite_i  (Hazard_Detection.PCWrite_o),
     .pc_i       (MUX_PC.data_o),
     .pc_o       ()
@@ -126,7 +140,7 @@ IF_ID IF_ID(
     .IF_ID_i    (Instruction_Memory.instr_o),
     .IF_ID_o    (),
     .PC_o       (),
-    .MemStall_i    (dcache_controller.cpu_stall_o)
+    .MemStall_i    (dcache.cpu_stall_o)
 );
 
 ID_EX ID_EX(
@@ -157,7 +171,7 @@ ID_EX ID_EX(
     .Rs1_o(),
     .Rs2_i(IF_ID.IF_ID_o[24:20]),
     .Rs2_o(),
-    .MemStall_i    (dcache_controller.cpu_stall_o)
+    .MemStall_i    (dcache.cpu_stall_o)
 );
 
 EX_MEM EX_MEM(
@@ -176,7 +190,7 @@ EX_MEM EX_MEM(
     .Readdata2_i(ForwardB_MUX.data_o),
     .INS_11_7_o(),
     .INS_11_7_i(ID_EX.INS_11_7_o),
-    .MemStall_i    (dcache_controller.cpu_stall_o)
+    .MemStall_i    (dcache.cpu_stall_o)
 );
 
 MEM_WB MEM_WB(
@@ -188,10 +202,10 @@ MEM_WB MEM_WB(
     .ALUresult_o(),
     .ALUresult_i(EX_MEM.ALUresult_o),
     .Readdata_o(),
-    .Readdata_i(Data_Memory.cpu_data_o),
+    .Readdata_i(dcache.cpu_data_o),
     .INS_11_7_o(),
     .INS_11_7_i(EX_MEM.INS_11_7_o),
-    .MemStall_i    (dcache_controller.cpu_stall_o)
+    .MemStall_i    (dcache.cpu_stall_o)
 );
 
 Forwarding_Unit Forwarding_Unit(
